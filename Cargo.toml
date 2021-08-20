@@ -3,7 +3,26 @@ name = "rds_proxy"
 version = "0.1.0"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+byteorder = "1.4.3"
+bytes = "1.0.1"
+color-eyre = "0.5.11"
+eyre = "0.6.5"
+futures = "0.3.16"
+memchr = "2.4.0"
+postgres-protocol = "0.6.1"
+rds = { git = "https://github.com/awslabs/aws-sdk-rust", tag = "v0.0.15-alpha", package = "aws-sdk-rds" }
 rusoto = "0.24.2"
+rusoto_credential = "0.47.0"
+tokio = { version = "1.10.0", features = ["full"]}
+tokio-postgres = "0.7.2"
+tokio-stream = "0.1.7"
+tokio-util = "0.6.7"
+tracing = "0.1.26"
+tracing-subscriber = "0.2.19"
+rusoto_signature = "0.47.0"
+postgres-native-tls = "0.5.0"
+native-tls = "0.2.8"
+config = "0.11.0"
+serde = "1.0.127"
+serde_derive = "1.0.127"
