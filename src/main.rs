@@ -5,6 +5,8 @@ use crate::backend_config::DbSpec;
 use byteorder::BigEndian;
 use byteorder::ByteOrder;
 use bytes::Bytes;
+use clap::App;
+use clap::Arg;
 use config::Config;
 use config::File;
 use eyre::{eyre, Result};
@@ -173,16 +175,32 @@ async fn run_proxy(config: BackendConfig) -> Result<()> {
     }
 }
 
-fn load_config() -> Result<BackendConfig> {
+fn load_config(config_file: &str) -> Result<BackendConfig> {
     let mut s = Config::default();
-    s.merge(File::with_name("proxy"))?;
+    s.merge(File::with_name(config_file))?;
     s.try_into().map_err(|e| e.into())
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     setup()?;
-    let backend_config = load_config()?;
-    run_proxy(backend_config).await?;
-    Ok(())
+    let matches = App::new("rds_proxy")
+        .version("1.0")
+        .author("Greg Soltis <greg@goldfiglabs.com")
+        .arg(
+            Arg::with_name("config")
+                .short("c")
+                .long("config")
+                .default_value("proxy")
+                .help("Sets the proxy config file to use")
+                .takes_value(true),
+        )
+        .get_matches();
+    if let Some(config_file) = matches.value_of("config") {
+        let backend_config = load_config(config_file)?;
+        run_proxy(backend_config).await?;
+        Ok(())
+    } else {
+        Err(eyre!("Missing config file"))
+    }
 }

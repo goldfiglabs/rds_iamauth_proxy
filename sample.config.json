@@ -1,0 +1,7 @@
+{
+  "endpoint": {
+    "hostname": "db.abcdef.us-east-1.rds.amazonaws.com",
+    "port": 5432
+  },
+  "region": "us-east-1"
+}
