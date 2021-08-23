@@ -3,7 +3,7 @@ name = "rds_proxy"
 version = "0.1.1"
 edition = "2018"
 license = "MIT"
-description = "A proxy to use IAM Authentication for connecting Postgres tools"
+description = "Connect existing Postgres tools to an RDS instance using IAM Authentication"
 
 [dependencies]
 byteorder = "1.4.3"
