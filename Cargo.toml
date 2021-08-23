@@ -1,9 +1,10 @@
 [package]
 name = "rds_proxy"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2018"
 license = "MIT"
 description = "Connect existing Postgres tools to an RDS instance using IAM Authentication"
+repository = "https://github.com/goldfiglabs/rds_proxy"
 
 [dependencies]
 byteorder = "1.4.3"
