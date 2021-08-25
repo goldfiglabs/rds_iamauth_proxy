@@ -159,7 +159,7 @@ async fn handle_client(
 
 async fn run_proxy(config: BackendConfig) -> Result<()> {
     let listener = TcpListener::bind("127.0.0.1:5435").await?;
-    info!("Listening");
+    info!("Listening on 127.0.0.1:5435");
     loop {
         let (stream, addr) = listener.accept().await?;
 
