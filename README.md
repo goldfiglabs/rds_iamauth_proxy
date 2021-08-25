@@ -18,3 +18,8 @@ See sample configs for a [direct connection](./sample.config.json)
 Installation: `cargo install rds_proxy`
 
 Usage: `rds_proxy -c <config file>`
+
+Upon success the proxy will be available for connections on `127.0.0.1:5435`.
+The connection string passed to the tool making use of the proxy can
+include any relevant username that the backend RDS instance is expecting. The
+password field is ignored.
