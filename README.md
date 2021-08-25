@@ -1,5 +1,5 @@
-rds-proxy
-=========
+rds-iamauth-proxy
+=================
 
 `rds-proxy` lets you make use of IAM-based authentication to
 AWS RDS instances from tools that don't natively support
