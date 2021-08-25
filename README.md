@@ -12,9 +12,9 @@ AWS credential (e.g. credentials file, environment variables, etc.).
 Optionally, you can point the proxy at a different endpoint to make use
 of something like an SSH tunnel to a bastion host.
 
+See sample configs for a [direct connection](./sample.config.json)
+ or via an [SSH Tunnel](./ssh-tunnel.config.json)
+
 Installation: `cargo install rds_proxy`
 
 Usage: `rds_proxy -c <config file>`
-
-See sample configs for a [direct connection](./sample.config.json)
- or via an [SSH Tunnel](./ssh-tunnel.config.json)
