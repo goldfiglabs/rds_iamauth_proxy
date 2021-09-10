@@ -23,3 +23,7 @@ Upon success the proxy will be available for connections on `127.0.0.1:5435`.
 The connection string passed to the tool making use of the proxy can
 include any relevant username that the backend RDS instance is expecting. The
 password field is ignored.
+
+#### Notes
+
+If installation fails with `error: failed to download zeroize v1.4.1` — please ensure `cargo` is up to date and try again.
