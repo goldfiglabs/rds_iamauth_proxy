@@ -1,30 +1,32 @@
 #[macro_use]
 extern crate serde_derive;
 
-use crate::backend_config::DbSpec;
+use std::net::SocketAddr;
+
 use byteorder::BigEndian;
 use byteorder::ByteOrder;
 use bytes::Bytes;
-use clap::App;
-use clap::Arg;
+use clap::arg;
+use clap::Command;
 use config::Config;
 use config::File;
 use eyre::{eyre, Result};
 use futures::SinkExt;
 use memchr::memchr;
 use postgres_native_tls::TlsStream;
-use std::net::SocketAddr;
 use tokio::io::split;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
 use tokio::net::TcpStream;
+use tokio::signal;
 use tokio_stream::StreamExt;
 use tokio_util::codec::{BytesCodec, Decoder};
 use tracing::{debug, info};
-use tracing_subscriber::EnvFilter;
+use tracing_subscriber::filter::EnvFilter;
 
 mod backend_config;
 use backend_config::BackendConfig;
+use backend_config::DbSpec;
 
 fn setup() -> Result<()> {
     if std::env::var("RUST_LIB_BACKTRACE").is_err() {
@@ -176,31 +178,36 @@ async fn run_proxy(config: BackendConfig) -> Result<()> {
 }
 
 fn load_config(config_file: &str) -> Result<BackendConfig> {
-    let mut s = Config::default();
-    s.merge(File::with_name(config_file))?;
-    s.try_into().map_err(|e| e.into())
+    let s = Config::builder()
+    .add_source(File::with_name(config_file))
+    .build()?;
+
+    s.try_deserialize().map_err(|e| e.into())
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     setup()?;
-    let matches = App::new("rds_proxy")
+
+    let matches = Command::new("rds_proxy")
         .version("1.0")
         .author("Greg Soltis <greg@goldfiglabs.com")
         .arg(
-            Arg::with_name("config")
-                .short("c")
-                .long("config")
-                .default_value("proxy")
-                .help("Sets the proxy config file to use")
-                .takes_value(true),
+            arg!(-c --config <CONFIG> "Sets the proxy config file to use")
         )
         .get_matches();
-    if let Some(config_file) = matches.value_of("config") {
+
+    if let Some(config_file) = matches.get_one::<String>("config") {
         let backend_config = load_config(config_file)?;
-        run_proxy(backend_config).await?;
-        Ok(())
+        tokio::spawn(run_proxy(backend_config));
     } else {
-        Err(eyre!("Missing config file"))
+        return Err(eyre!("Missing config file"));
+    }
+
+    match signal::ctrl_c().await {
+        Ok(()) => Ok(()),
+        Err(err) => {
+            Err(eyre!("Unable to listen for shutdown signal: {}", err))
+        },
     }
 }
