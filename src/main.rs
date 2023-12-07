@@ -195,15 +195,17 @@ async fn main() -> Result<()> {
         .arg(arg!(-c --config <CONFIG> "Sets the proxy config file to use"))
         .get_matches();
 
-    if let Some(config_file) = matches.get_one::<String>("config") {
-        let backend_config = load_config(config_file)?;
-        tokio::spawn(run_proxy(backend_config));
-    } else {
-        return Err(eyre!("Missing config file"));
+    let config_file = matches
+        .get_one::<String>("config")
+        .ok_or(eyre!("Missing config file"))?;
+
+    let backend_config = load_config(config_file)?;
+
+    // Run the proxy until we either get a Ctrl-C event or the proxy fails
+    tokio::select! {
+        _ = run_proxy(backend_config) => {}
+        _ = signal::ctrl_c() => {}
     }
 
-    match signal::ctrl_c().await {
-        Ok(()) => Ok(()),
-        Err(err) => Err(eyre!("Unable to listen for shutdown signal: {}", err)),
-    }
+    Ok(())
 }
