@@ -179,8 +179,8 @@ async fn run_proxy(config: BackendConfig) -> Result<()> {
 
 fn load_config(config_file: &str) -> Result<BackendConfig> {
     let s = Config::builder()
-    .add_source(File::with_name(config_file))
-    .build()?;
+        .add_source(File::with_name(config_file))
+        .build()?;
 
     s.try_deserialize().map_err(|e| e.into())
 }
@@ -192,9 +192,7 @@ async fn main() -> Result<()> {
     let matches = Command::new("rds_proxy")
         .version("1.0")
         .author("Greg Soltis <greg@goldfiglabs.com")
-        .arg(
-            arg!(-c --config <CONFIG> "Sets the proxy config file to use")
-        )
+        .arg(arg!(-c --config <CONFIG> "Sets the proxy config file to use"))
         .get_matches();
 
     if let Some(config_file) = matches.get_one::<String>("config") {
@@ -206,8 +204,6 @@ async fn main() -> Result<()> {
 
     match signal::ctrl_c().await {
         Ok(()) => Ok(()),
-        Err(err) => {
-            Err(eyre!("Unable to listen for shutdown signal: {}", err))
-        },
+        Err(err) => Err(eyre!("Unable to listen for shutdown signal: {}", err)),
     }
 }
