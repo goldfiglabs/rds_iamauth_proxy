@@ -127,14 +127,11 @@ pub async fn get_rds_password(
     username: &str,
 ) -> Result<String> {
     let config = aws_config::load_defaults(BehaviorVersion::v2023_11_09()).await;
-
-    let credentials = config
+    let provider = config
         .credentials_provider()
-        .expect("no credentials provider found")
-        .provide_credentials()
-        .await
-        .expect("unable to load credentials");
-    let identity = credentials.into();
+        .ok_or(eyre!("no credentials provider found"))?;
+    let creds = provider.provide_credentials().await?;
+    let identity = creds.into();
 
     let mut signing_settings = SigningSettings::default();
     signing_settings.expires_in = Some(Duration::from_secs(900));
@@ -157,18 +154,15 @@ pub async fn get_rds_password(
         url.as_str(),
         std::iter::empty(),
         SignableBody::Bytes(&[]),
-    )
-    .expect("signable request");
+    )?;
+    let (instructions, _) = sign(signable_request, &signing_params.into())?.into_parts();
 
-    let (signing_instructions, _signature) =
-        sign(signable_request, &signing_params.into())?.into_parts();
-
-    for (name, value) in signing_instructions.params() {
+    for (name, value) in instructions.params() {
         url.query_pairs_mut().append_pair(name, value);
     }
 
-    let response = url.to_string().split_off(HTTPS_LEN);
-    Ok(response)
+    let password = url.to_string().split_off(HTTPS_LEN);
+    Ok(password)
 }
 
 async fn send_password<S>(db_spec: &DbSpec, stream: &mut S, password: String) -> Result<()>
