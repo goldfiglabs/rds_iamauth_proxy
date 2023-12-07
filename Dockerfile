@@ -17,4 +17,4 @@ FROM alpine:3.18.5 AS runtime
 RUN addgroup -S rdsproxy && adduser -S rdsproxy -G rdsproxy
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/rds_proxy /usr/local/bin/
 USER rdsproxy
-CMD ["/usr/local/bin/rds_proxy", "--config", "/etc/rds_proxy/config.json"]
+CMD ["/usr/local/bin/rds_proxy", "--config", "/etc/rds_proxy/config.json", "--listen", "0.0.0.0:5435"]

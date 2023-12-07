@@ -159,9 +159,9 @@ async fn handle_client(
     Ok(())
 }
 
-async fn run_proxy(config: BackendConfig) -> Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:5435").await?;
-    info!("Listening on 127.0.0.1:5435");
+async fn run_proxy(config: BackendConfig, listen_address: &str) -> Result<()> {
+    let listener = TcpListener::bind(listen_address).await?;
+    info!("Listening on {listen_address}");
     loop {
         let (stream, addr) = listener.accept().await?;
 
@@ -192,18 +192,21 @@ async fn main() -> Result<()> {
     let matches = Command::new("rds_proxy")
         .version("1.0")
         .author("Greg Soltis <greg@goldfiglabs.com")
-        .arg(arg!(-c --config <CONFIG> "Sets the proxy config file to use"))
+        .arg(arg!(-c --config <CONFIG> "Sets the proxy config file to use").default_value("proxy"))
+        .arg(
+            arg!(-l --listen <LISTEN> "Sets the address to listen on")
+                .default_value("127.0.0.1:5435"),
+        )
         .get_matches();
 
-    let config_file = matches
-        .get_one::<String>("config")
-        .ok_or(eyre!("Missing config file"))?;
+    let config_file = matches.get_one::<String>("config").unwrap();
+    let listen_address = matches.get_one::<String>("listen").unwrap();
 
     let backend_config = load_config(config_file)?;
 
     // Run the proxy until we either get a Ctrl-C event or the proxy fails
     tokio::select! {
-        _ = run_proxy(backend_config) => {}
+        _ = run_proxy(backend_config, listen_address) => {}
         _ = signal::ctrl_c() => {}
     }
 
