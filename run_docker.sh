@@ -9,7 +9,7 @@ fi
 
 # Check that config file exists
 if [ ! -f "$HOME/.rds_proxy/config.json" ]; then
-  echo "ERROR: Config file not found at $HOME/.rds_proxy/config.yml"
+  echo "ERROR: Config file not found at $HOME/.rds_proxy/config.json"
   exit 1
 fi
 
