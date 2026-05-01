@@ -1,5 +1,10 @@
-FROM clux/muslrust:1.85.0-stable AS chef
+FROM clux/muslrust:1.95.0-stable AS chef
 USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    perl \
+    && rm -rf /var/lib/apt/lists/*
 RUN cargo install cargo-chef
 WORKDIR /app
 
